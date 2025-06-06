@@ -123,9 +123,11 @@ export const AuthProvider = ({ children }) => {
       console.log('Request config:', request);
       const result = await promptAsync();
       console.log('Resultado de autenticación:', result);
+      return result;
     } catch (error) {
       console.error('Error durante el login:', error);
       Alert.alert('Error', 'Ocurrió un error durante el inicio de sesión');
+      throw error;
     }
   };
 
