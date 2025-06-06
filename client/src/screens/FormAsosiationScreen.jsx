@@ -1,11 +1,9 @@
-;
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useAuth } from '../src/context/AuthContext';
 
 
-const AssociateFormScreen = ({ navigation }) => {
+const FormularioAsociacionScreen = ({ navigation }) => {
   const { user, token } = useAuth(); // asumimos que ya tenés esto
   const [formData, setFormData] = useState({
     nombre: '',
@@ -98,4 +96,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default AssociateFormScreen;
+export default FormularioAsociacionScreen;
