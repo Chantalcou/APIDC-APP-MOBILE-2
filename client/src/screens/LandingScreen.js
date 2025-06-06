@@ -13,16 +13,21 @@ import {
 } from 'react-native';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'expo-router';
 
 const LandingScreen = () => {
   const { width, height } = useWindowDimensions();
   const isSmallDevice = height < 700;
   const { login } = useAuth();
+  const router = useRouter();
 
   const handleAssociate = async () => {
     try {
       console.log('ASOCIATE button pressed');
-      await login();
+      const result = await login();
+      if (result?.type === 'success') {
+        router.push('/associate-form');
+      }
     } catch (error) {
       console.error('Error in handleAssociate:', error);
       Alert.alert('Error', 'No se pudo iniciar el proceso de asociación');
