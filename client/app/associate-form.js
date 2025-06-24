@@ -1,11 +1,11 @@
-;
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 
 
-const AssociateFormScreen = ({ navigation }) => {
+const AssociateFormScreen = () => {
+  const router = useRouter();
   const { user, token } = useAuth(); // asumimos que ya tenés esto
   const [formData, setFormData] = useState({
     nombre: '',
@@ -33,7 +33,7 @@ const AssociateFormScreen = ({ navigation }) => {
       const data = await res.json();
       if (res.ok) {
         Alert.alert("Listo", "¡Gracias por asociarte!");
-        navigation.navigate("Home"); // o a donde corresponda
+        router.push('/'); // navega a la pantalla principal
       } else {
         console.error(data);
         Alert.alert("Error", "No se pudo guardar la asociación");
