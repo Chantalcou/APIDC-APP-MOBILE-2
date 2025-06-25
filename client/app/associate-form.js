@@ -1,78 +1,171 @@
-;
-
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 'react-native';
-import { useAuth } from '../src/context/AuthContext';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Modal
+} from 'react-native';
 
-
-const AssociateFormScreen = ({ navigation }) => {
-  const { user, token } = useAuth(); // asumimos que ya tenés esto
-  const [formData, setFormData] = useState({
+const AssociateFormScreen = () => {
+  const initialForm = {
     nombre: '',
     apellido: '',
-    direccion: '',
+    fechaNacimiento: '',
+    dni: '',
+    email: '',
+    telefono: '',
+    calle: '',
+    numero: '',
+    ciudad: '',
+    codigoPostal: '',
+    provincia: '',
+    observaciones: '',
     reprocan: false,
-    gestorAsociado: ''
-  });
+    numeroReprocan: '',
+    vencimiento: '',
+    fotoReprocan: '',
+    numeroGestor: ''
+  };
+
+  const [formData, setFormData] = useState(initialForm);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const resetForm = () => setFormData(initialForm);
+
   const handleSubmit = async () => {
+    console.log('Enviando...');
+
+    let fechaFormateada = null;
+    if (formData.vencimiento.trim() !== "") {
+      try {
+        const raw = formData.vencimiento.replace(/[^0-9]/g, "");
+        if (raw.length !== 8) throw new Error();
+        const anio = parseInt(raw.substring(0, 4), 10);
+        const mes = parseInt(raw.substring(4, 6), 10);
+        const dia = parseInt(raw.substring(6, 8), 10);
+        const fecha = new Date(anio, mes - 1, dia);
+        if (isNaN(fecha.getTime())) throw new Error();
+        const yyyy = fecha.getFullYear();
+        const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+        const dd = String(fecha.getDate()).padStart(2, '0');
+        fechaFormateada = `${yyyy}-${mm}-${dd}`;
+      } catch {
+        alert("Fecha inválida. Usá el formato AAAA-MM-DD, / o sin separadores.");
+        return;
+      }
+    }
+
+    const data = {
+      records: [
+        {
+          fields: {
+            Nombre: formData.nombre,
+            Apellido: formData.apellido,
+            DNI: parseInt(formData.dni, 10),
+            Email: formData.email,
+            Teléfono: formData.telefono,
+            Calle: formData.calle,
+            Número: parseInt(formData.numero, 10),
+            Ciudad: formData.ciudad,
+            'Código postal': parseInt(formData.codigoPostal, 10),
+            Provincia: formData.provincia,
+            'Observaciones (dirección)': formData.observaciones,
+            Reprocan: formData.reprocan ? "Si" : "No",
+            'Fecha Vencimiento REPROCAN': fechaFormateada,
+            "Foto carnet Reprocann": formData.fotoReprocan,
+            "Número gestor asociado": formData.numeroGestor
+          }
+        }
+      ]
+    };
+
     try {
-      const res = await fetch('http://localhost:5001/asociacion', {
-        method: 'POST',
+      const response = await fetch("https://api.airtable.com/v0/appCDrP23fH52YCbp/tbl3HOjmNEioTpv3F", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: "Bearer patSU2icXycbtz3vc.be5d6426343ab6746cd54b6dde7dfbe5d6ae6df3375ccf71d0176674a3595bc1",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(data)
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        Alert.alert("Listo", "¡Gracias por asociarte!");
-        navigation.navigate("Home"); // o a donde corresponda
+      const result = await response.json();
+
+      if (response.ok) {
+        setModalVisible(true);
+        resetForm();
       } else {
-        console.error(data);
-        Alert.alert("Error", "No se pudo guardar la asociación");
+        console.log("Respuesta de Airtable:", result);
+        alert("No se pudo guardar la asociación.");
       }
     } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Hubo un problema en el envío");
+      console.log("ERROR:", error);
+      alert("Error de red. Verificá tu conexión o token de Airtable.");
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Formulario de Asociación</Text>
+
+      {[
+        { key: 'nombre', placeholder: 'Nombre' },
+        { key: 'apellido', placeholder: 'Apellido' },
+        { key: 'dni', placeholder: 'DNI', keyboardType: 'numeric' },
+        { key: 'email', placeholder: 'Email', keyboardType: 'email-address' },
+        { key: 'telefono', placeholder: 'Teléfono', keyboardType: 'phone-pad' },
+        { key: 'calle', placeholder: 'Calle' },
+        { key: 'numero', placeholder: 'Número' },
+        { key: 'ciudad', placeholder: 'Ciudad' },
+        { key: 'codigoPostal', placeholder: 'Código Postal' },
+        { key: 'provincia', placeholder: 'Provincia' },
+        { key: 'observaciones', placeholder: 'Observaciones' },
+        { key: 'numeroReprocan', placeholder: 'Número de REPROCANN' },
+        { key: 'vencimiento', placeholder: 'Vencimiento REPROCANN (AAAA-MM-DD, / o sin separadores)' },
+        { key: 'fotoReprocan', placeholder: 'URL de foto REPROCANN' },
+        { key: 'numeroGestor', placeholder: 'Número del Gestor Asociado' }
+      ].map(({ key, placeholder, keyboardType }) => (
+        <TextInput
+          key={key}
+          placeholder={placeholder}
+          style={styles.input}
+          keyboardType={keyboardType || 'default'}
+          value={formData[key]}
+          onChangeText={text => handleChange(key, text)}
+        />
+      ))}
+
       <TextInput
-        placeholder="Nombre"
+        placeholder="¿Posee REPROCANN vigente? (sí/no)"
         style={styles.input}
-        onChangeText={text => handleChange("nombre", text)}
-      />
-      <TextInput
-        placeholder="Apellido"
-        style={styles.input}
-        onChangeText={text => handleChange("apellido", text)}
-      />
-      <TextInput
-        placeholder="Dirección"
-        style={styles.input}
-        onChangeText={text => handleChange("direccion", text)}
-      />
-      <TextInput
-        placeholder="¿Tenés REPROCANN? (sí/no)"
-        style={styles.input}
+        value={formData.reprocan ? "sí" : "no"}
         onChangeText={text => handleChange("reprocan", text.toLowerCase() === 'sí' || text.toLowerCase() === 'si')}
       />
-      <TextInput
-        placeholder="Gestor Asociado (opcional)"
-        style={styles.input}
-        onChangeText={text => handleChange("gestorAsociado", text)}
-      />
-      <Button title="Enviar datos" onPress={handleSubmit} />
+
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Enviar datos</Text>
+      </TouchableOpacity>
+
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>✅ ¡Formulario enviado con éxito!</Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -80,21 +173,67 @@ const AssociateFormScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
     flexGrow: 1
   },
   title: {
-    fontSize: 20,
-    marginBottom: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    textAlign: 'center'
+    marginBottom: 25,
+    textAlign: 'center',
+    color: '#333'
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 10,
-    marginBottom: 15
+    padding: 12,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: 16,
+    elevation: 1
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+    elevation: 2
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '600'
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 25,
+    borderRadius: 12,
+    alignItems: 'center',
+    width: '80%'
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+    color: '#333',
+    textAlign: 'center'
+  },
+  modalButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 20
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontWeight: '600'
   }
 });
 
