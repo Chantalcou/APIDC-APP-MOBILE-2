@@ -6,6 +6,17 @@ const Asociado = require('./models/Asociado');
 const app = express();
 app.use(express.json());
 
+// Ruta para crear un asociado
+app.post('/api/asociado', async (req, res) => {
+  try {
+    const asociado = await Asociado.create(req.body);
+    res.json(asociado);
+  } catch (err) {
+    console.error('Error al crear asociado:', err);
+    res.status(500).json({ error: 'Error al crear el asociado' });
+  }
+});
+
 async function startServer() {
   try {
     await sequelize.sync();
