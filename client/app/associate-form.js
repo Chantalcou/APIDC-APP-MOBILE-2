@@ -63,37 +63,32 @@ const AssociateFormScreen = () => {
     }
 
     const data = {
-      records: [
-        {
-          fields: {
-            Nombre: formData.nombre,
-            Apellido: formData.apellido,
-            DNI: parseInt(formData.dni, 10),
-            Email: formData.email,
-            Teléfono: formData.telefono,
-            Calle: formData.calle,
-            Número: parseInt(formData.numero, 10),
-            Ciudad: formData.ciudad,
-            'Código postal': parseInt(formData.codigoPostal, 10),
-            Provincia: formData.provincia,
-            'Observaciones (dirección)': formData.observaciones,
-            Reprocan: formData.reprocan ? "Si" : "No",
-            'Fecha Vencimiento REPROCAN': fechaFormateada,
-            "Foto carnet Reprocann": formData.fotoReprocan,
-            "Número gestor asociado": formData.numeroGestor
-          }
-        }
-      ]
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      fechaNacimiento: formData.fechaNacimiento || null,
+      dni: formData.dni,
+      email: formData.email,
+      telefono: formData.telefono,
+      calle: formData.calle,
+      numero: formData.numero,
+      ciudad: formData.ciudad,
+      codigoPostal: formData.codigoPostal,
+      provincia: formData.provincia,
+      observaciones: formData.observaciones,
+      reprocan: formData.reprocan,
+      numeroReprocan: formData.numeroReprocan,
+      vencimiento: fechaFormateada,
+      fotoReprocan: formData.fotoReprocan,
+      numeroGestor: formData.numeroGestor,
     };
 
     try {
-      const response = await fetch("https://api.airtable.com/v0/appCDrP23fH52YCbp/tbl3HOjmNEioTpv3F", {
-        method: "POST",
+      const response = await fetch('http://localhost:3001/api/asociado', {
+        method: 'POST',
         headers: {
-          Authorization: "Bearer patSU2icXycbtz3vc.be5d6426343ab6746cd54b6dde7dfbe5d6ae6df3375ccf71d0176674a3595bc1",
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
@@ -102,12 +97,12 @@ const AssociateFormScreen = () => {
         setModalVisible(true);
         resetForm();
       } else {
-        console.log("Respuesta de Airtable:", result);
+        console.log('Respuesta del servidor:', result);
         alert("No se pudo guardar la asociación.");
       }
     } catch (error) {
       console.log("ERROR:", error);
-      alert("Error de red. Verificá tu conexión o token de Airtable.");
+      alert('Error de red. Verificá tu conexión.');
     }
   };
 
