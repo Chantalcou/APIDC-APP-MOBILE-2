@@ -9,11 +9,10 @@ app.use(express.json());
 // Ruta para crear un asociado
 app.post('/api/asociado', async (req, res) => {
   try {
-    const asociado = await Asociado.create(req.body);
-    res.json(asociado);
-  } catch (err) {
-    console.error('Error al crear asociado:', err);
-    res.status(500).json({ error: 'Error al crear el asociado' });
+    const nuevo = await Asociado.create(req.body);
+    res.status(201).json(nuevo);
+  } catch {
+    res.status(500).json({ message: 'Error interno al crear el asociado' });
   }
 });
 
