@@ -1,29 +1,21 @@
-const { Pool } = require('pg');
+const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  dialectOptions: process.env.NODE_ENV === 'production' ? { ssl: { rejectUnauthorized: false } } : {},
 });
 
 async function init() {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL
-      )
-    `);
-    console.log("✅ Tabla 'users' verificada o creada.");
+    await sequelize.authenticate();
+    console.log('✅ Conexión con PostgreSQL establecida.');
   } catch (err) {
-    console.error('❌ Error inicializando la base:', err);
+    console.error('❌ Error al conectar a la base:', err);
     process.exit(1);
   }
 }
 
 init();
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-};
+module.exports = sequelize;

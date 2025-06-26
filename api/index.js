@@ -1,25 +1,62 @@
 require('dotenv').config();
 const express = require('express');
-const db = require('./db');
+const sequelize = require('./db');
+const Asociado = require('./models/Asociado');
 
 const app = express();
 app.use(express.json());
 
-app.post('/users', async (req, res) => {
-  const { username, password } = req.body;
+// Sincronizar modelos con la base al iniciar
+sequelize.sync();
 
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password required' });
+app.post('/api/asociado', async (req, res) => {
+  const {
+    nombre,
+    apellido,
+    fechaNacimiento,
+    dni,
+    email,
+    telefono,
+    calle,
+    numero,
+    ciudad,
+    codigoPostal,
+    provincia,
+    observaciones,
+    reprocan,
+    numeroReprocan,
+    vencimiento,
+    fotoReprocan,
+    numeroGestor,
+  } = req.body;
+
+  if (!nombre || !apellido || !email) {
+    return res.status(400).json({ error: 'nombre, apellido y email son obligatorios' });
   }
 
   try {
-    const result = await db.query(
-      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
-      [username, password]
-    );
-    res.status(201).json({ id: result.rows[0].id });
+    const nuevo = await Asociado.create({
+      nombre,
+      apellido,
+      fechaNacimiento,
+      dni,
+      email,
+      telefono,
+      calle,
+      numero,
+      ciudad,
+      codigoPostal,
+      provincia,
+      observaciones,
+      reprocan,
+      numeroReprocan,
+      vencimiento,
+      fotoReprocan,
+      numeroGestor,
+    });
+    res.status(201).json(nuevo);
   } catch (err) {
-    console.error('❌ Error en inserción:', err);
+    console.error('❌ Error al crear asociado:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
