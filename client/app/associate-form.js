@@ -9,7 +9,9 @@ import {
   Modal
 } from 'react-native';
 
-const API_URL = 'http://localhost:3001/api/asociado';
+// The backend listens on the port defined in api/.env (5001 by default).
+// Point the form submission to that port to avoid connection errors.
+const API_URL = 'http://localhost:5001/api/asociado';
 
 const AssociateFormScreen = () => {
   const initialForm = {
