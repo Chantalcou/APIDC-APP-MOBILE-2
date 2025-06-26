@@ -9,6 +9,8 @@ import {
   Modal
 } from 'react-native';
 
+const API_URL = 'http://localhost:3001/api/asociado';
+
 const AssociateFormScreen = () => {
   const initialForm = {
     nombre: '',
@@ -83,7 +85,7 @@ const AssociateFormScreen = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:3001/api/asociado', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
