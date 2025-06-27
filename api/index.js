@@ -1,31 +1,32 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
+const asociadoRoutes = require('./routes/asociado.route');
 const sequelize = require('./db');
-const Asociado = require('./models/Asociado');
 
 const app = express();
-app.use(express.json());
 
-// Ruta para crear un asociado
-app.post('/api/asociado', async (req, res) => {
-  try {
-    const nuevo = await Asociado.create(req.body);
-    res.status(201).json(nuevo);
-  } catch {
-    res.status(500).json({ message: 'Error interno al crear el asociado' });
-  }
+app.use(cors({ origin: '*' }));
+app.options('*', cors({ origin: '*' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get('/', (req, res) => {
+  res.send('API funcionando 👌');
 });
 
-async function startServer() {
+app.use('/api/asociado', asociadoRoutes);
+
+async function start() {
   try {
     await sequelize.sync();
-    const PORT = process.env.PORT || 3001;
+    const PORT = process.env.PORT || 5001;
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor escuchando en el puerto ${PORT}`);
+      console.log('Servidor corriendo…');
     });
   } catch (err) {
-    console.error('❌ Error al sincronizar la base de datos:', err);
+    console.error('Error al iniciar la aplicación:', err);
   }
 }
 
-startServer();
+start();
