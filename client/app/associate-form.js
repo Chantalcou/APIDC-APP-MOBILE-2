@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 
 // The backend listens on the port defined in api/.env (5001 by default).
-// Point the form submission to that port to avoid connection errors.
-const API_URL = 'http://localhost:5001/api/asociado';
+// Replace the placeholder below with the public ngrok URL to test on a device
+// or the Expo web browser. Example: 'https://abcd1234.ngrok-free.app/api/asociado'
+const API_URL = 'https://YOUR_NGROK_URL/api/asociado';
 
 const AssociateFormScreen = () => {
   const initialForm = {
