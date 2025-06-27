@@ -8,7 +8,6 @@ router.post('/', async (req, res) => {
     const nuevo = await Asociado.create(req.body);
     res.status(201).json(nuevo);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Error al crear asociado' });
   }
 });
