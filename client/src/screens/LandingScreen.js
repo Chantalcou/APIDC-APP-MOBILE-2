@@ -18,7 +18,7 @@ import { useRouter } from 'expo-router';
 const LandingScreen = () => {
   const { width, height } = useWindowDimensions();
   const isSmallDevice = height < 700;
-  const { login } = useAuth();
+  const { login, isAuthenticating } = useAuth();
   const router = useRouter();
 
   const handleAssociate = async () => {
@@ -71,10 +71,14 @@ const LandingScreen = () => {
 
         {/* Buttons Section */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={styles.button}
+          <TouchableOpacity
+            style={[
+              styles.button,
+              isAuthenticating && styles.buttonDisabled
+            ]}
             activeOpacity={0.8}
             onPress={handleAssociate}
+            disabled={isAuthenticating}
           >
             <Text style={styles.buttonText}>
               ASOCIATE
@@ -165,6 +169,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     fontFamily: Platform.OS === 'ios' ? 'SF Pro Display' : 'Roboto',

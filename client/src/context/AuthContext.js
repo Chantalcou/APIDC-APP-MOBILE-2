@@ -33,6 +33,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -118,6 +119,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async () => {
     try {
+      if (isAuthenticating) {
+        return { type: 'locked' };
+      }
+      setIsAuthenticating(true);
       console.log('Iniciando proceso de login...');
       console.log('Redirect URI que se está usando:', redirectUri);
       console.log('Request config:', request);
@@ -128,6 +133,8 @@ export const AuthProvider = ({ children }) => {
       console.error('Error durante el login:', error);
       Alert.alert('Error', 'Ocurrió un error durante el inicio de sesión');
       throw error;
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
@@ -142,10 +149,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isLoading, 
-      login, 
+    <AuthContext.Provider value={{
+      user,
+      isLoading,
+      isAuthenticating,
+      login,
       logout
     }}>
       {children}
