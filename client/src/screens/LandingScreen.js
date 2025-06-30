@@ -24,10 +24,7 @@ const LandingScreen = () => {
   const handleAssociate = async () => {
     try {
       console.log('ASOCIATE button pressed');
-      const result = await login();
-      if (result?.type === 'success') {
-        navigation.navigate(ROUTES.FORMULARIO);
-      }
+      await login('login', () => navigation.navigate(ROUTES.FORMULARIO));
     } catch (error) {
       console.error('Error in handleAssociate:', error);
       Alert.alert('Error', 'No se pudo iniciar el proceso de asociación');
