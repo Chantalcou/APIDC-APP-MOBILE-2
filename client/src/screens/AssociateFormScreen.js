@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { ROUTES } from '../navigation/routes';
 
 
 const AssociateFormScreen = ({ navigation }) => {
@@ -31,7 +32,7 @@ const AssociateFormScreen = ({ navigation }) => {
       const data = await res.json();
       if (res.ok) {
         Alert.alert("Listo", "¡Gracias por asociarte!");
-        navigation.navigate("Home"); // o a donde corresponda
+        navigation.navigate(ROUTES.LANDING); // o a donde corresponda
       } else {
         console.error(data);
         Alert.alert("Error", "No se pudo guardar la asociación");
