@@ -1,3 +1,4 @@
+// client/app/AssociateFormScreen.js
 import React, { useState } from 'react';
 import {
   View,
@@ -9,12 +10,19 @@ import {
   Modal
 } from 'react-native';
 
+<<<<<<< HEAD
 // The backend listens on the port defined in api/.env (5001 by default).
 // Replace the placeholder below with the public ngrok URL to test on a device
 // or the Expo web browser. Example: 'https://abcd1234.ngrok-free.app/api/asociado'
 const API_URL = 'https://YOUR_NGROK_URL/api/asociado';
+=======
+/* 🔗  cambia sólo esta línea cuando reinicies ngrok */
+const API_URL =
+  'https://51ab-2800-2131-5400-542-555-62db-8de2-eda1.ngrok-free.app/api/asociado';
+>>>>>>> d0ca723 (navbar global)
 
-const AssociateFormScreen = () => {
+export default function AssociateFormScreen() {
+  /* ─────── estado ─────── */
   const initialForm = {
     nombre: '',
     apellido: '',
@@ -34,83 +42,82 @@ const AssociateFormScreen = () => {
     fotoReprocan: '',
     numeroGestor: ''
   };
-
   const [formData, setFormData] = useState(initialForm);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [okModal, setOkModal] = useState(false);
+  const [errModal, setErrModal] = useState({ visible: false, msg: '' });
 
-  const handleChange = (field, value) => {
+  const handleChange = (field, value) =>
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   const resetForm = () => setFormData(initialForm);
 
+  /* ─────── envío ─────── */
   const handleSubmit = async () => {
-    console.log('Enviando...');
-
+    /* formatea vencimiento (AAAAMMDD, AA-AA, etc.) */
     let fechaFormateada = null;
-    if (formData.vencimiento.trim() !== "") {
+    if (formData.vencimiento.trim()) {
       try {
-        const raw = formData.vencimiento.replace(/[^0-9]/g, "");
+        const raw = formData.vencimiento.replace(/[^0-9]/g, '');
         if (raw.length !== 8) throw new Error();
-        const anio = parseInt(raw.substring(0, 4), 10);
-        const mes = parseInt(raw.substring(4, 6), 10);
-        const dia = parseInt(raw.substring(6, 8), 10);
-        const fecha = new Date(anio, mes - 1, dia);
-        if (isNaN(fecha.getTime())) throw new Error();
-        const yyyy = fecha.getFullYear();
-        const mm = String(fecha.getMonth() + 1).padStart(2, '0');
-        const dd = String(fecha.getDate()).padStart(2, '0');
-        fechaFormateada = `${yyyy}-${mm}-${dd}`;
+        fechaFormateada =
+          `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
       } catch {
-        alert("Fecha inválida. Usá el formato AAAA-MM-DD, / o sin separadores.");
+        setErrModal({
+          visible: true,
+          msg: '❌ Fecha inválida. Usá el formato AAAA-MM-DD.'
+        });
         return;
       }
     }
 
-    const data = {
-      nombre: formData.nombre,
-      apellido: formData.apellido,
-      fechaNacimiento: formData.fechaNacimiento || null,
-      dni: formData.dni,
-      email: formData.email,
-      telefono: formData.telefono,
-      calle: formData.calle,
-      numero: formData.numero,
-      ciudad: formData.ciudad,
-      codigoPostal: formData.codigoPostal,
-      provincia: formData.provincia,
-      observaciones: formData.observaciones,
-      reprocan: formData.reprocan,
-      numeroReprocan: formData.numeroReprocan,
-      vencimiento: fechaFormateada,
-      fotoReprocan: formData.fotoReprocan,
-      numeroGestor: formData.numeroGestor,
-    };
+    const payload = { ...formData, vencimiento: fechaFormateada };
 
     try {
-      const response = await fetch(API_URL, {
+      const res = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
 
-      const result = await response.json();
-
-      if (response.ok) {
-        setModalVisible(true);
+      /* — Éxito — */
+      if (res.ok) {
+        setOkModal(true);
         resetForm();
-      } else {
-        console.log('Respuesta del servidor:', result);
-        alert("No se pudo guardar la asociación.");
+        return;
       }
-    } catch (error) {
-      console.log("ERROR:", error);
-      alert('Error de red. Verificá tu conexión.');
+
+      /* — Errores controlados — */
+      const { error } = await res.json();
+
+      if (res.status === 409) {
+        setErrModal({
+          visible: true,
+          msg:
+            '❌ El e-mail ya está registrado.\n' +
+            'Si ya sos socio, iniciá sesión desde “Soy socio”.'
+        });
+        return;
+      }
+
+      if (res.status === 422) {
+        setErrModal({ visible: true, msg: `❌ ${error}` });
+        return;
+      }
+
+      /* — Error interno — */
+      setErrModal({
+        visible: true,
+        msg:   '❌ El e-mail ya está registrado.\n' +
+            'Si ya sos socio, iniciá sesión desde “Soy socio”.'
+      });
+    } catch {
+      setErrModal({
+        visible: true,
+        msg: '❌ Error de red. Verificá tu conexión.'
+      });
     }
   };
 
+  /* ─────── render ─────── */
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Formulario de Asociación</Text>
@@ -127,10 +134,13 @@ const AssociateFormScreen = () => {
         { key: 'codigoPostal', placeholder: 'Código Postal' },
         { key: 'provincia', placeholder: 'Provincia' },
         { key: 'observaciones', placeholder: 'Observaciones' },
-        { key: 'numeroReprocan', placeholder: 'Número de REPROCANN' },
-        { key: 'vencimiento', placeholder: 'Vencimiento REPROCANN (AAAA-MM-DD, / o sin separadores)' },
-        { key: 'fotoReprocan', placeholder: 'URL de foto REPROCANN' },
-        { key: 'numeroGestor', placeholder: 'Número del Gestor Asociado' }
+        { key: 'numeroReprocan', placeholder: 'Número REPROCANN' },
+        {
+          key: 'vencimiento',
+          placeholder: 'Vencimiento REPROCANN (AAAA-MM-DD)'
+        },
+        { key: 'fotoReprocan', placeholder: 'URL foto REPROCANN' },
+        { key: 'numeroGestor', placeholder: 'Número Gestor Asociado' }
       ].map(({ key, placeholder, keyboardType }) => (
         <TextInput
           key={key}
@@ -145,22 +155,43 @@ const AssociateFormScreen = () => {
       <TextInput
         placeholder="¿Posee REPROCANN vigente? (sí/no)"
         style={styles.input}
-        value={formData.reprocan ? "sí" : "no"}
-        onChangeText={text => handleChange("reprocan", text.toLowerCase() === 'sí' || text.toLowerCase() === 'si')}
+        value={formData.reprocan ? 'sí' : 'no'}
+        onChangeText={txt =>
+          handleChange(
+            'reprocan',
+            ['sí', 'si', 'yes'].includes(txt.toLowerCase())
+          )
+        }
       />
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Enviar datos</Text>
       </TouchableOpacity>
 
-      <Modal visible={modalVisible} transparent animationType="fade">
+      {/* Modal Éxito */}
+      <Modal visible={okModal} transparent animationType="fade">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>✅ ¡Formulario enviado con éxito!</Text>
             <TouchableOpacity
               style={styles.modalButton}
-              onPress={() => setModalVisible(false)}
-            >
+              onPress={() => setOkModal(false)}>
+              <Text style={styles.modalButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal Error */}
+      <Modal visible={errModal.visible} transparent animationType="fade">
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, styles.modalError]}>
+            <Text style={[styles.modalText, { color: '#e53935' }]}>
+              {errModal.msg}
+            </Text>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: '#e53935' }]}
+              onPress={() => setErrModal({ visible: false, msg: '' })}>
               <Text style={styles.modalButtonText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
@@ -168,12 +199,13 @@ const AssociateFormScreen = () => {
       </Modal>
     </ScrollView>
   );
-};
+}
 
+/* ─────── estilos ─────── */
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fafafa',
     flexGrow: 1
   },
   title: {
@@ -194,18 +226,14 @@ const styles = StyleSheet.create({
     elevation: 1
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#007aff',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
     elevation: 2
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '600'
-  },
+  buttonText: { color: '#fff', fontSize: 17, fontWeight: '600' },
   modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -219,6 +247,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '80%'
   },
+  modalError: { borderColor: '#e53935', borderWidth: 1 },
   modalText: {
     fontSize: 18,
     marginBottom: 20,
@@ -226,15 +255,10 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   modalButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#007aff',
     borderRadius: 6,
     paddingVertical: 10,
     paddingHorizontal: 20
   },
-  modalButtonText: {
-    color: '#fff',
-    fontWeight: '600'
-  }
+  modalButtonText: { color: '#fff', fontWeight: '600' }
 });
-
-export default AssociateFormScreen;
