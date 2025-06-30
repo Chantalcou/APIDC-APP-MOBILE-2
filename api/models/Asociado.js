@@ -6,7 +6,7 @@ const Asociado = sequelize.define('Asociado', {
   apellido: { type: DataTypes.STRING, allowNull: false },
   fechaNacimiento: { type: DataTypes.DATEONLY },
   dni: { type: DataTypes.STRING },
-  email: { type: DataTypes.STRING, allowNull: false },
+  email: { type: DataTypes.STRING, allowNull: false, unique: true },
   telefono: { type: DataTypes.STRING },
   calle: { type: DataTypes.STRING },
   numero: { type: DataTypes.STRING },
