@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView } from 're
 import { useAuth } from '../context/AuthContext';
 
 
-const FormularioAsociacionScreen = ({ navigation }) => {
+const AssociateFormScreen = ({ navigation }) => {
   const { user, token } = useAuth(); // asumimos que ya tenés esto
   const [formData, setFormData] = useState({
     nombre: '',
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default FormularioAsociacionScreen;
+export default AssociateFormScreen;

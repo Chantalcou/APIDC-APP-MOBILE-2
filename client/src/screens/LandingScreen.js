@@ -11,7 +11,6 @@ import {
   useWindowDimensions,
   Alert,
 } from 'react-native';
-import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
 
@@ -37,7 +36,6 @@ const LandingScreen = () => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <Navbar />
       <ImageBackground
         source={{
           uri: 'https://res.cloudinary.com/dqgjcfosx/image/upload/v1740671503/Dise%C3%B1o_sin_t%C3%ADtulo_3_ocqnjy.png',
