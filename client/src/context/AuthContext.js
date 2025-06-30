@@ -53,55 +53,6 @@ export const AuthProvider = ({ children }) => {
     checkSession();
   }, []);
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { code } = response.params;
-      console.log('Código recibido:', code);
-      
-      // Intercambiar el código por un token
-      fetch(`https://${AUTH0_DOMAIN}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          grant_type: 'authorization_code',
-          client_id: AUTH0_CLIENT_ID,
-          code_verifier: request.codeVerifier,
-          code: code,
-          redirect_uri: redirectUri,
-        }),
-      })
-      .then(res => res.json())
-      .then(tokenData => {
-        console.log('Token data:', tokenData);
-        const { access_token } = tokenData;
-        
-        // Obtener información del usuario
-        return fetch(`https://${AUTH0_DOMAIN}/userinfo`, {
-          headers: { Authorization: `Bearer ${access_token}` }
-        });
-      })
-      .then(res => res.json())
-      .then(userInfo => {
-        console.log('Información del usuario:', userInfo);
-        const userData = {
-          ...userInfo,
-          access_token: response.params.access_token
-        };
-        setUser(userData);
-        AsyncStorage.setItem('user', JSON.stringify(userData));
-        console.log('Login exitoso');
-      })
-      .catch(error => {
-        console.error('Error durante la autenticación:', error);
-        Alert.alert('Error', 'No se pudo completar el inicio de sesión');
-      });
-    } else if (response?.type === 'error') {
-      console.error('Error en la autenticación:', response.error);
-      Alert.alert('Error', 'No se pudo completar el inicio de sesión');
-    }
-  }, [response]);
 
   const checkSession = async () => {
     try {
@@ -116,13 +67,49 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async () => {
+  const login = async (mode = 'login', onSuccess) => {
     try {
       console.log('Iniciando proceso de login...');
       console.log('Redirect URI que se está usando:', redirectUri);
       console.log('Request config:', request);
-      const result = await promptAsync();
+      const result = await promptAsync({ useProxy: true });
       console.log('Resultado de autenticación:', result);
+
+      if (result.type === 'success') {
+        const { code } = result.params;
+
+        const tokenRes = await fetch(`https://${AUTH0_DOMAIN}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            grant_type: 'authorization_code',
+            client_id: AUTH0_CLIENT_ID,
+            code_verifier: request.codeVerifier,
+            code,
+            redirect_uri: redirectUri
+          })
+        });
+        const tokenData = await tokenRes.json();
+        const { access_token } = tokenData;
+
+        const userRes = await fetch(`https://${AUTH0_DOMAIN}/userinfo`, {
+          headers: { Authorization: `Bearer ${access_token}` }
+        });
+        const userInfo = await userRes.json();
+
+        const userData = {
+          ...userInfo,
+          access_token
+        };
+        setUser(userData);
+        await AsyncStorage.setItem('user', JSON.stringify(userData));
+        console.log('Login exitoso');
+
+        onSuccess?.();
+      }
+
       return result;
     } catch (error) {
       console.error('Error durante el login:', error);
