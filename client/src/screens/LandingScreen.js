@@ -12,20 +12,21 @@ import {
   Alert,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { ROUTES } from '../navigation/routes';
 
 const LandingScreen = () => {
   const { width, height } = useWindowDimensions();
   const isSmallDevice = height < 700;
   const { login } = useAuth();
-  const router = useRouter();
+  const navigation = useNavigation();
 
   const handleAssociate = async () => {
     try {
       console.log('ASOCIATE button pressed');
       const result = await login();
       if (result?.type === 'success') {
-        router.push('/associate-form');
+        navigation.navigate(ROUTES.FORMULARIO);
       }
     } catch (error) {
       console.error('Error in handleAssociate:', error);
@@ -173,4 +174,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LandingScreen; 
+export default LandingScreen;

@@ -8,6 +8,8 @@ import Navbar from './src/components/Navbar';
 
 import LandingScreen from './src/screens/LandingScreen';
 import AssociateFormScreen from './src/screens/AssociateFormScreen';
+import NotFoundScreen from './src/screens/NotFoundScreen';
+import { ROUTES } from './src/navigation/routes';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,8 +20,9 @@ export default function App() {
         <Navbar />
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Landing" component={LandingScreen} />
-            <Stack.Screen name="Formulario" component={AssociateFormScreen} />
+            <Stack.Screen name={ROUTES.LANDING} component={LandingScreen} />
+            <Stack.Screen name={ROUTES.FORMULARIO} component={AssociateFormScreen} />
+            <Stack.Screen name={ROUTES.NOT_FOUND} component={NotFoundScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaView>
