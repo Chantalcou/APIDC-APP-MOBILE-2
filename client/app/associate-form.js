@@ -10,16 +10,9 @@ import {
   Modal
 } from 'react-native';
 
-<<<<<<< HEAD
-// The backend listens on the port defined in api/.env (5001 by default).
-// Replace the placeholder below with the public ngrok URL to test on a device
-// or the Expo web browser. Example: 'https://abcd1234.ngrok-free.app/api/asociado'
-const API_URL = 'https://YOUR_NGROK_URL/api/asociado';
-=======
 /* 🔗  cambia sólo esta línea cuando reinicies ngrok */
 const API_URL =
   'https://51ab-2800-2131-5400-542-555-62db-8de2-eda1.ngrok-free.app/api/asociado';
->>>>>>> d0ca723 (navbar global)
 
 export default function AssociateFormScreen() {
   /* ─────── estado ─────── */
