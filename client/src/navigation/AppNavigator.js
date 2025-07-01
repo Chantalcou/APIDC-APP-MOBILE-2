@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 /* ─── Pantallas ─── */
 import LandingScreen from '../screens/LandingScreen';
-import AssociateFormScreen from '../screens/AssociateFormScreen';
+import AssociateFormScreen from '../../app/associate-form';
 import { ROUTES } from './routes';
 // import DashboardScreen from '../screens/DashboardScreen';   
 // import LoginScreen from '../screens/LoginScreen';         
